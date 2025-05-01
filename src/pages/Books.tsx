@@ -63,6 +63,17 @@ const Books: React.FC = () => {
     }
   }, [navigate]);
 
+  // Add effect to handle bookId changes from URL
+  useEffect(() => {
+    if (bookId) {
+      // In a real app, this would fetch the specific book by ID
+      // For now, we just use the mock data
+      setSelectedBook(mockBookDetails);
+    } else {
+      setSelectedBook(null);
+    }
+  }, [bookId]);
+
   const handleBackToSearch = () => {
     setSelectedBook(null);
     navigate('/books');
