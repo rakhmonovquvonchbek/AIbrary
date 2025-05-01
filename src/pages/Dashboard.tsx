@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import StudentDashboard from '@/components/dashboard/StudentDashboard';
 import LibrarianDashboard from '@/components/dashboard/LibrarianDashboard';
@@ -7,10 +7,16 @@ import LibrarianDashboard from '@/components/dashboard/LibrarianDashboard';
 const Dashboard: React.FC = () => {
   // In a real app, this would come from an authentication context
   // This is just for demo purposes
-  const [userRole, setUserRole] = useState<'student' | 'librarian'>('student');
+  const [userRole, setUserRole] = useState<'student' | 'librarian'>(() => {
+    // Try to get the role from localStorage to persist it between page navigations
+    const savedRole = localStorage.getItem('userRole');
+    return (savedRole === 'librarian' ? 'librarian' : 'student');
+  });
   
   const toggleRole = () => {
-    setUserRole(prev => prev === 'student' ? 'librarian' : 'student');
+    const newRole = userRole === 'student' ? 'librarian' : 'student';
+    setUserRole(newRole);
+    localStorage.setItem('userRole', newRole);
   };
 
   return (

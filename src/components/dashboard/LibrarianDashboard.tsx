@@ -133,7 +133,7 @@ const LibrarianDashboard: React.FC = () => {
           </CardHeader>
           <CardContent className="flex items-end justify-between">
             <div className="text-xs text-muted-foreground">
-              <p>32 overdue by > 7 days</p>
+              <p>32 overdue by &gt; 7 days</p>
               <p>12 fines collected</p>
             </div>
             <Archive className="h-8 w-8 text-library-error opacity-70" />

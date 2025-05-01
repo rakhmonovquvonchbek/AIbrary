@@ -47,6 +47,20 @@ const BookDetail: React.FC = () => {
   const navigate = useNavigate();
   const [book, setBook] = useState<BookDetailsProps | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // In a real app, this would come from an authentication context
+  // For demo purposes, we can use the same toggle from Dashboard.tsx
+  const [userRole, setUserRole] = useState<'student' | 'librarian'>(() => {
+    // Try to get the role from localStorage to persist it between page navigations
+    const savedRole = localStorage.getItem('userRole');
+    return (savedRole === 'librarian' ? 'librarian' : 'student');
+  });
+
+  const toggleRole = () => {
+    const newRole = userRole === 'student' ? 'librarian' : 'student';
+    setUserRole(newRole);
+    localStorage.setItem('userRole', newRole);
+  };
 
   useEffect(() => {
     // In a real app, this would be an API call to fetch book details by ID
@@ -62,6 +76,11 @@ const BookDetail: React.FC = () => {
 
   const handleBack = () => {
     navigate('/books');
+  };
+
+  const handleBookUpdate = (updatedBook: BookDetailsProps) => {
+    setBook(updatedBook);
+    // In a real app, this would call an API to update the book in the database
   };
 
   if (isLoading) {
@@ -108,8 +127,24 @@ const BookDetail: React.FC = () => {
   return (
     <MainLayout>
       <div className="container py-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">Book Details</h1>
-        <BookDetails book={book} onBack={handleBack} />
+        <div className="mb-6 flex justify-between items-center">
+          <h1 className="text-3xl font-bold text-gray-800">Book Details</h1>
+          
+          {/* Demo toggle - this would not exist in a real app */}
+          <button 
+            onClick={toggleRole} 
+            className="text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-1 rounded"
+          >
+            Switch to {userRole === 'student' ? 'Librarian' : 'Student'} View (Demo)
+          </button>
+        </div>
+        
+        <BookDetails 
+          book={book} 
+          onBack={handleBack} 
+          isLibrarian={userRole === 'librarian'}
+          onBookUpdate={handleBookUpdate}
+        />
       </div>
     </MainLayout>
   );

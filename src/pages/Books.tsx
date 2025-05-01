@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import BookSearch from '@/components/books/BookSearch';
 import BookDetails, { BookDetailsProps } from '@/components/books/BookDetails';
@@ -50,20 +50,53 @@ const Books: React.FC = () => {
     bookId ? mockBookDetails : null
   );
 
+  // In a real app, this would come from an authentication context
+  const [userRole, setUserRole] = useState<'student' | 'librarian'>(() => {
+    // Try to get the role from localStorage to persist it between page navigations
+    const savedRole = localStorage.getItem('userRole');
+    return (savedRole === 'librarian' ? 'librarian' : 'student');
+  });
+  
+  const toggleRole = () => {
+    const newRole = userRole === 'student' ? 'librarian' : 'student';
+    setUserRole(newRole);
+    localStorage.setItem('userRole', newRole);
+  };
+
   const handleBackToSearch = () => {
     setSelectedBook(null);
     navigate('/books');
   };
 
+  const handleBookUpdate = (updatedBook: BookDetailsProps) => {
+    setSelectedBook(updatedBook);
+    // In a real app, this would call an API to update the book
+  };
+
   return (
     <MainLayout>
       <div className="container py-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">
-          {selectedBook ? 'Book Details' : 'Library Collection'}
-        </h1>
+        <div className="mb-6 flex justify-between items-center">
+          <h1 className="text-3xl font-bold text-gray-800">
+            {selectedBook ? 'Book Details' : 'Library Collection'}
+          </h1>
+          
+          {/* Demo toggle - this would not exist in a real app */}
+          <button 
+            onClick={toggleRole} 
+            className="text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-1 rounded"
+          >
+            Switch to {userRole === 'student' ? 'Librarian' : 'Student'} View (Demo)
+          </button>
+        </div>
         
         {selectedBook ? (
-          <BookDetails book={selectedBook} onBack={handleBackToSearch} />
+          <BookDetails 
+            book={selectedBook} 
+            onBack={handleBackToSearch} 
+            isLibrarian={userRole === 'librarian'}
+            onBookUpdate={handleBookUpdate}
+          />
         ) : (
           <BookSearch />
         )}

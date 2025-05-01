@@ -1,11 +1,12 @@
 
 import React, { useState } from 'react';
-import { Book as BookIcon, ChevronLeft, Calendar, User, FileText, Clock, List } from 'lucide-react';
+import { Book as BookIcon, ChevronLeft, Calendar, User, FileText, Clock, List, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import BookEditDialog from './BookEditDialog';
 
 export interface BookDetailsProps {
   id: string;
@@ -33,12 +34,21 @@ export interface BookDetailsProps {
 interface BookDetailsComponentProps {
   book: BookDetailsProps;
   onBack: () => void;
+  isLibrarian?: boolean;  // New prop to determine if user is a librarian
+  onBookUpdate?: (updatedBook: BookDetailsProps) => void;  // New prop for handling updates
 }
 
-const BookDetails: React.FC<BookDetailsComponentProps> = ({ book, onBack }) => {
+const BookDetails: React.FC<BookDetailsComponentProps> = ({ 
+  book, 
+  onBack, 
+  isLibrarian = false,  // Default to student view
+  onBookUpdate
+}) => {
   const [isReserving, setIsReserving] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [currentBook, setCurrentBook] = useState<BookDetailsProps>(book);
   const { toast } = useToast();
-  const isAvailable = book.availableCopies > 0;
+  const isAvailable = currentBook.availableCopies > 0;
 
   const handleReserve = () => {
     setIsReserving(true);
@@ -47,10 +57,17 @@ const BookDetails: React.FC<BookDetailsComponentProps> = ({ book, onBack }) => {
     setTimeout(() => {
       toast({
         title: "Book Reserved",
-        description: `You've successfully reserved "${book.title}". Please pick it up within 24 hours.`,
+        description: `You've successfully reserved "${currentBook.title}". Please pick it up within 24 hours.`,
       });
       setIsReserving(false);
     }, 1500);
+  };
+
+  const handleBookUpdate = (updatedBook: BookDetailsProps) => {
+    setCurrentBook(updatedBook);
+    if (onBookUpdate) {
+      onBookUpdate(updatedBook);
+    }
   };
 
   return (
@@ -69,10 +86,10 @@ const BookDetails: React.FC<BookDetailsComponentProps> = ({ book, onBack }) => {
         {/* Book Cover and Basic Info */}
         <div>
           <div className="bg-white rounded-lg overflow-hidden shadow-card mb-4">
-            {book.coverImage ? (
+            {currentBook.coverImage ? (
               <img 
-                src={book.coverImage} 
-                alt={`${book.title} cover`}
+                src={currentBook.coverImage} 
+                alt={`${currentBook.title} cover`}
                 className="w-full h-auto object-cover"
               />
             ) : (
@@ -93,24 +110,34 @@ const BookDetails: React.FC<BookDetailsComponentProps> = ({ book, onBack }) => {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-500">Copies:</span>
-                <span className="font-medium">{book.availableCopies} of {book.totalCopies} available</span>
+                <span className="font-medium">{currentBook.availableCopies} of {currentBook.totalCopies} available</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-500">ISBN:</span>
-                <span className="font-medium">{book.isbn}</span>
+                <span className="font-medium">{currentBook.isbn}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-500">Language:</span>
-                <span className="font-medium">{book.language}</span>
+                <span className="font-medium">{currentBook.language}</span>
               </div>
               <div className="pt-3 border-t border-gray-100">
-                <Button 
-                  className="w-full bg-library-primary hover:bg-library-secondary"
-                  disabled={!isAvailable || isReserving}
-                  onClick={handleReserve}
-                >
-                  {isReserving ? "Processing..." : isAvailable ? "Reserve Book" : "Join Waitlist"}
-                </Button>
+                {isLibrarian ? (
+                  <Button 
+                    className="w-full bg-library-primary hover:bg-library-secondary"
+                    onClick={() => setEditDialogOpen(true)}
+                  >
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit Book Information
+                  </Button>
+                ) : (
+                  <Button 
+                    className="w-full bg-library-primary hover:bg-library-secondary"
+                    disabled={!isAvailable || isReserving}
+                    onClick={handleReserve}
+                  >
+                    {isReserving ? "Processing..." : isAvailable ? "Reserve Book" : "Join Waitlist"}
+                  </Button>
+                )}
               </div>
             </div>
           </Card>
@@ -119,11 +146,11 @@ const BookDetails: React.FC<BookDetailsComponentProps> = ({ book, onBack }) => {
         {/* Book Details */}
         <div className="md:col-span-2 space-y-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">{book.title}</h1>
-            <p className="text-xl text-gray-600 mb-4">by {book.author}</p>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">{currentBook.title}</h1>
+            <p className="text-xl text-gray-600 mb-4">by {currentBook.author}</p>
 
             <div className="flex flex-wrap gap-2 mb-6">
-              {book.subjects.map((subject, index) => (
+              {currentBook.subjects.map((subject, index) => (
                 <Badge key={index} variant="secondary" className="bg-library-accent/20 hover:bg-library-accent/30">
                   {subject}
                 </Badge>
@@ -218,6 +245,16 @@ const BookDetails: React.FC<BookDetailsComponentProps> = ({ book, onBack }) => {
           </Tabs>
         </div>
       </div>
+
+      {/* Book Edit Dialog - Only rendered for librarians */}
+      {isLibrarian && (
+        <BookEditDialog 
+          book={currentBook}
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          onSave={handleBookUpdate}
+        />
+      )}
     </div>
   );
 };
