@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Search, Filter, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -23,6 +22,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Book } from 'lucide-react';
 
 // Mock book data
 const mockBooks: BookData[] = [
@@ -324,7 +324,7 @@ const BookSearch: React.FC = () => {
         </div>
       ) : (
         <div className="text-center py-16">
-          <BookIcon className="mx-auto h-12 w-12 text-gray-300" />
+          <Book className="h-12 w-12" />
           <h2 className="mt-4 text-xl font-medium text-gray-900">No books found</h2>
           <p className="mt-2 text-gray-500">
             Try adjusting your search or filter to find what you're looking for.

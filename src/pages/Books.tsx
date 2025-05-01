@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
 import BookSearch from '@/components/books/BookSearch';
 import BookDetails, { BookDetailsProps } from '@/components/books/BookDetails';
-import { useParams, useNavigate } from 'react-router-dom';
 
 // Mock detailed book data
 const mockBookDetails: BookDetailsProps = {
@@ -49,19 +49,19 @@ const Books: React.FC = () => {
   const [selectedBook, setSelectedBook] = useState<BookDetailsProps | null>(
     bookId ? mockBookDetails : null
   );
-
-  // In a real app, this would come from an authentication context
-  const [userRole, setUserRole] = useState<'student' | 'librarian'>(() => {
-    // Try to get the role from localStorage to persist it between page navigations
-    const savedRole = localStorage.getItem('userRole');
-    return (savedRole === 'librarian' ? 'librarian' : 'student');
-  });
+  const [userRole, setUserRole] = useState<'student' | 'librarian' | null>(null);
   
-  const toggleRole = () => {
-    const newRole = userRole === 'student' ? 'librarian' : 'student';
-    setUserRole(newRole);
-    localStorage.setItem('userRole', newRole);
-  };
+  useEffect(() => {
+    // Get user role from localStorage
+    const savedRole = localStorage.getItem('userRole');
+    
+    if (savedRole === 'student' || savedRole === 'librarian') {
+      setUserRole(savedRole);
+    } else {
+      // If no valid role is found, redirect to login
+      navigate('/login');
+    }
+  }, [navigate]);
 
   const handleBackToSearch = () => {
     setSelectedBook(null);
@@ -73,21 +73,17 @@ const Books: React.FC = () => {
     // In a real app, this would call an API to update the book
   };
 
+  if (!userRole) {
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  }
+
   return (
     <MainLayout>
       <div className="container py-8">
-        <div className="mb-6 flex justify-between items-center">
+        <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-800">
             {selectedBook ? 'Book Details' : 'Library Collection'}
           </h1>
-          
-          {/* Demo toggle - this would not exist in a real app */}
-          <button 
-            onClick={toggleRole} 
-            className="text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-1 rounded"
-          >
-            Switch to {userRole === 'student' ? 'Librarian' : 'Student'} View (Demo)
-          </button>
         </div>
         
         {selectedBook ? (
