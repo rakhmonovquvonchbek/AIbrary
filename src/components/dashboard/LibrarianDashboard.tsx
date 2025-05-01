@@ -1,11 +1,13 @@
-
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Book, Clock, User, Database, ChartBar, Archive, Plus } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import BookAddDialog from '@/components/books/BookAddDialog';
+import { BookDetailsProps } from '@/components/books/BookDetails';
+import { useToast } from '@/hooks/use-toast';
 
 // Mock data for the dashboard
 const overdueBooks = [
@@ -68,12 +70,34 @@ const recentActivities = [
 ];
 
 const LibrarianDashboard: React.FC = () => {
+  const [addBookDialogOpen, setAddBookDialogOpen] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleAddBook = (newBook: BookDetailsProps) => {
+    // In a real app, this would call an API to add the book to the database
+    // For now, we'll just show a success message and optionally navigate to the book
+    toast({
+      title: "Book Added Successfully",
+      description: `"${newBook.title}" has been added to the library collection.`
+    });
+    
+    // Navigate to the new book's detail page after a short delay
+    setTimeout(() => {
+      navigate(`/books/${newBook.id}`);
+    }, 500);
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-800">Librarian Dashboard</h2>
         <div className="flex space-x-2">
-          <Button className="bg-library-primary hover:bg-library-secondary" size="sm">
+          <Button 
+            className="bg-library-primary hover:bg-library-secondary" 
+            size="sm"
+            onClick={() => setAddBookDialogOpen(true)}
+          >
             <Plus className="mr-2 h-4 w-4" /> Add Book
           </Button>
           <Button variant="outline" size="sm">
@@ -255,6 +279,13 @@ const LibrarianDashboard: React.FC = () => {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Book Add Dialog */}
+      <BookAddDialog 
+        open={addBookDialogOpen}
+        onOpenChange={setAddBookDialogOpen}
+        onSave={handleAddBook}
+      />
     </div>
   );
 };

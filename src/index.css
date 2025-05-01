@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -49,6 +50,15 @@
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* Library specific colors */
+    --library-primary: 226 70% 55.9%;
+    --library-secondary: 226 58% 45%;
+    --library-accent: 246 100% 77%;
+    --library-success: 142 76% 36%;
+    --library-warning: 38 92% 50%;
+    --library-error: 0 84% 60%;
+    --library-info: 199 89% 48%;
   }
 
   .dark {
@@ -98,4 +108,14 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Library specific animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
 }
